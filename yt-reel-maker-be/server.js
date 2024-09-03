@@ -714,9 +714,6 @@
 //   console.log(`Server is running on port ${port}`);
 // });
 
-
-
-
 const express = require('express');
 const ytdl = require('@distube/ytdl-core');
 const cors = require('cors');
@@ -794,8 +791,12 @@ app.post('/download-and-process', async (req, res) => {
     outputStream.on('finish', () => {
       console.log(`Video download completed: ${outputFilePath}`);
 
-      // Run the Python script to process the video and create clips
-      exec(`python3 python-scripts/process_video.py ${outputFilePath}`, (err, stdout, stderr) => {
+      // Define the path to the Python executable in the virtual environment
+      const pythonExecutable = path.join(__dirname, 'venv', 'bin', 'python3');
+      const pythonScriptPath = path.join(__dirname, 'python-scripts', 'process_video.py');
+
+      // Run the Python script to process the video and create clips using the virtual environment's Python interpreter
+      exec(`${pythonExecutable} ${pythonScriptPath} ${outputFilePath}`, (err, stdout, stderr) => {
         if (err) {
           console.error('Error processing video with Python script:', err);
           return res.status(500).json({ error: 'Failed to process video' });
@@ -843,6 +844,7 @@ app.get('/clips/:filename', (req, res) => {
     }
   });
 });
+
 const port = process.env.PORT || 5002;
 const host = '0.0.0.0';
 
